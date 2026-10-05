@@ -1,0 +1,78 @@
+def manhattan(state, goal):
+    total = 0
+    for i in range(3):
+        for j in range(3):
+            val = state[i][j]
+            if val != 0:
+                for x in range(3):
+                    for y in range(3):
+                        if goal[x][y] == val:
+                            total += abs(i - x) + abs(j - y)
+    return total
+
+
+def get_neighbors(state):
+    neighbors = []
+    state = [row[:] for row in state]
+
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] == 0:
+                x, y = i, j
+
+    moves = [(-1,0), (1,0), (0,-1), (0,1)] # U D L R
+
+    for dx, dy in moves:
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < 3 and 0 <= ny < 3:
+            new_state = [row[:] for row in state]
+            new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
+            neighbors.append(new_state)
+
+    return neighbors
+
+
+def a_star(start, goal):
+    open_list = [(start, 0, [])] # (state, g, path)
+    closed = []
+
+    while open_list:
+
+        current, g, path = min(open_list, key=lambda x: x[1] + manhattan(x[0], goal))
+        open_list.remove((current, g, path))
+
+        if current in closed:
+            continue
+        closed.append(current)
+        
+        print("g =", g, "h =", manhattan(current, goal), "f =", g + manhattan(current, goal))
+        for row in current:
+            print(row)
+        print()
+
+        if current == goal:
+            print("Goal Reached!\n")
+            print("🔹 Path:")
+            for step in path + [current]:
+                for row in step:
+                    print(row)
+                print()
+            return
+
+        for neighbor in get_neighbors(current):
+            if neighbor not in closed:
+                open_list.append((neighbor, g + 1, path + [current]))
+
+start = [
+    [2, 8, 3],
+    [1, 6, 4],
+    [7, 0, 5]
+]
+
+goal = [
+    [1, 2, 3],
+    [8, 0, 4],
+    [7, 6, 5]
+]
+
+a_star(start, goal)
